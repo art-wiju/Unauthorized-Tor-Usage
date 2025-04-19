@@ -2,7 +2,7 @@
 
 
 # Threat Hunt Report: Unauthorized TOR Usage
-- [Scenario Creation](https://github.com/joshmadakor0/threat-hunting-scenario-tor/blob/main/threat-hunting-scenario-tor-event-creation.md)
+- [Scenario Creation](https://github.com/art-wiju/Unauthorized-Tor-Usage/blob/main/threat-hunting-scenario-tor-event-creation.md)
 
 ## Platforms and Languages Leveraged
 - Windows 10 Virtual Machines (Microsoft Azure)
@@ -26,20 +26,23 @@ Management suspects that some employees may be using TOR browsers to bypass netw
 
 ### 1. Searched the `DeviceFileEvents` Table
 
-Searched for any file that had the string "tor" in it and discovered what looks like the user "employee" downloaded a TOR installer, did something that resulted in many TOR-related files being copied to the desktop, and the creation of a file called `tor-shopping-list.txt` on the desktop at `2024-11-08T22:27:19.7259964Z`. These events began at `2024-11-08T22:14:48.6065231Z`.
+Searched the DeviceFileEvents table for ANY file that had the string 'tor' in it and discoveredw hat looks like the user "labus" downloaded a tor installer, did something that resulted in many tor-related files being copied to the desktop and the creation of a file called `tor-shopping-list.txt` in the `\ProgramData` folder. This is a hidden folder, so this is something quite suspicious. These events began at:
+Query to locate events: `2025-04-19T04:01:59.7381591Z`
+
+
 
 **Query used to locate events:**
 
 ```kql
-DeviceFileEvents  
-| where DeviceName == "threat-hunt-lab"  
-| where InitiatingProcessAccountName == "employee"  
-| where FileName contains "tor"  
-| where Timestamp >= datetime(2024-11-08T22:14:48.6065231Z)  
-| order by Timestamp desc  
-| project Timestamp, DeviceName, ActionType, FileName, FolderPath, SHA256, Account = InitiatingProcessAccountName
+DeviceFileEvents
+| where DeviceName == 'windows-worksta'
+| where FileName contains "tor"
+| where Timestamp >= todatetime(('2025-04-19T04:01:59.7381591Z'))
+| order by Timestamp Asc
+| project Timestamp, DeviceName, FileName, FolderPath, SHA256, Account = InitiatingProcessAccountName
 ```
-<img width="1212" alt="image" src="https://github.com/user-attachments/assets/71402e84-8767-44f8-908c-1805be31122d">
+![image](https://github.com/user-attachments/assets/4acabcd0-4a21-41c1-86bb-86da23f33748)
+
 
 ---
 
